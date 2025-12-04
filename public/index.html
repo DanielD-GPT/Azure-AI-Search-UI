@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure AI Search</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Home Page -->
+        <div id="homePage" class="page">
+            <header class="header">
+                <h1 class="title">Azure AI Search</h1>
+                <p class="subtitle">Discover insights with intelligent search</p>
+            </header>
+
+            <main class="main">
+                <div class="search-container">
+                    <form id="searchForm" class="search-form">
+                        <div class="search-input-container">
+                            <input 
+                                type="text" 
+                                id="searchInput" 
+                                class="search-input" 
+                                placeholder="Enter your search query..."
+                                required
+                            >
+                            <button type="submit" class="search-button">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"></circle>
+                                    <path d="m21 21-4.35-4.35"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="loadingSpinner" class="loading hidden">
+                    <div class="spinner"></div>
+                    <p>Searching...</p>
+                </div>
+
+                <div id="errorMessage" class="error-message hidden">
+                    <p><strong>Unable to complete search</strong></p>
+                    <p>Please check your connection and try again.</p>
+                </div>
+            </main>
+        </div>
+
+        <!-- Results Page -->
+        <div id="resultsPage" class="page hidden">
+            <header class="results-page-header">
+                <div class="results-header-content">
+                    <h1 class="results-title">Azure AI Search</h1>
+                    <div class="results-search-container">
+                        <form id="resultsSearchForm" class="results-search-form">
+                            <div class="search-input-container">
+                                <input 
+                                    type="text" 
+                                    id="resultsSearchInput" 
+                                    class="search-input results-search-input" 
+                                    placeholder="Enter your search query..."
+                                    required
+                                >
+                                <button type="submit" class="search-button">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <path d="m21 21-4.35-4.35"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </header>
+
+            <main class="results-main">
+                <div id="resultsContainer" class="results-container">
+                    <div class="results-header">
+                        <h2 id="resultsTitle">Search Results</h2>
+                        <span id="resultsCount" class="results-count"></span>
+                    </div>
+                    <div id="resultsList" class="results-list"></div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
