@@ -2,6 +2,10 @@
 
 A modern Node.js web application that provides an elegant search interface powered by Azure AI Search with semantic search capabilities.
 
+> ⚠️ **DISCLAIMER**
+> 
+> This application is a **prototype** intended for **proof of concept and demonstration purposes only**. It is not designed, tested, or supported for production use. Use at your own risk. Microsoft makes no warranties, express or implied, regarding the functionality, reliability, or suitability of this code for any purpose. For production scenarios, please consult official Microsoft documentation and implement appropriate security, scalability, and compliance measures.
+
 ## Features
 
 - 🔍 **Semantic Search** - AI-powered search with query rewriting and semantic ranking
