@@ -21,12 +21,39 @@ class SearchApp {
         this.resultsPerPage = 50;
         this.maxResults = 300; // Maximum 300 results (6 pages × 50 results)
 
+        // Sort controls
+        this.sortBy = 'relevance'; // 'relevance' or 'ai'
+        this.sortRelevanceBtn = document.getElementById('sortRelevance');
+        this.sortAIBtn = document.getElementById('sortAI');
+
         this.init();
     }
 
     init() {
         this.searchForm.addEventListener('submit', (e) => this.handleSearch(e));
         this.resultsSearchForm.addEventListener('submit', (e) => this.handleSearch(e));
+
+        this.sortRelevanceBtn.addEventListener('click', () => this.setSortOrder('relevance'));
+        this.sortAIBtn.addEventListener('click', () => this.setSortOrder('ai'));
+    }
+
+    setSortOrder(sortBy) {
+        this.sortBy = sortBy;
+        this.sortRelevanceBtn.classList.toggle('active', sortBy === 'relevance');
+        this.sortAIBtn.classList.toggle('active', sortBy === 'ai');
+        this.sortResults();
+        this.currentPage = 1;
+        this.displayCurrentPage();
+        this.createPagination();
+        this.scrollToResults();
+    }
+
+    sortResults() {
+        if (this.sortBy === 'ai') {
+            this.allResults.sort((a, b) => (b.rerankerScore || 0) - (a.rerankerScore || 0));
+        } else {
+            this.allResults.sort((a, b) => (b.score || 0) - (a.score || 0));
+        }
     }
 
     showHomePage() {
@@ -52,6 +79,9 @@ class SearchApp {
 
         // Store the current search query for highlighting
         this.currentSearchQuery = query;
+        // Pre-compile search term regexes once per query
+        const searchTerms = query.toLowerCase().split(/\s+/).filter(term => term.length > 2);
+        this._searchTermRegexes = searchTerms.map(term => new RegExp(`\\b(${this.escapeRegex(term)})\\b`, 'gi'));
 
         // Sync search inputs
         this.searchInput.value = query;
@@ -94,8 +124,9 @@ class SearchApp {
             return;
         }
 
-        // Store all results and reset to first page
+        // Store all results, sort, and reset to first page
         this.allResults = results;
+        this.sortResults();
         this.currentPage = 1;
 
         this.resultsTitle.textContent = `Search Results for "${query}"`;
@@ -202,12 +233,17 @@ class SearchApp {
     createResultHTML(result) {
         const title = this.escapeHtml(result.title || 'Untitled');
         const content = this.truncateText(this.escapeHtml(result.content || ''), 300);
-        const url = result.url || '#';
+        const rawUrl = result.url || '#';
         const score = result.score ? result.score.toFixed(2) : 'N/A';
         const rerankerScore = result.rerankerScore ? result.rerankerScore.toFixed(2) : null;
         
-        // Extract document name from the path
-        const documentName = this.getDocumentName(url);
+        // Decode base64 parent_id to get the actual blob URL and document name (cache on result)
+        if (!result._decodedUrl) {
+            result._decodedUrl = this.decodeParentId(rawUrl);
+            result._documentName = this.getDocumentName(result._decodedUrl);
+        }
+        const decodedUrl = result._decodedUrl;
+        const documentName = result._documentName;
         
         // Handle semantic captions (more relevant snippets from semantic search)
         const semanticCaption = result.captions && result.captions.length > 0 ? 
@@ -235,10 +271,15 @@ class SearchApp {
             this.highlightSearchTerms(this.escapeHtml(semanticCaption)) :
             this.highlightSearchTerms(this.highlightText(content, result.highlights));
 
+        // Use data attribute to store the base64 parent_id; link goes to blob proxy
+        const blobProxyUrl = rawUrl && rawUrl !== '#' 
+            ? `/api/search/blob?parentId=${encodeURIComponent(rawUrl)}`
+            : '#';
+
         return `
             <div class="result-item">
                 <div class="result-title">
-                    <a href="${url}" target="_blank" class="document-link">📄 ${documentName}</a>
+                    <a href="${this.escapeHtml(blobProxyUrl)}" target="_blank" class="document-link">📄 ${this.escapeHtml(documentName)}</a>
                     ${rerankerScore ? `<span class="semantic-badge">Semantic AI</span>` : ''}
                 </div>
                 <div class="result-content">
@@ -272,18 +313,28 @@ class SearchApp {
     }
 
     highlightSearchTerms(text) {
-        if (!this.currentSearchQuery) return text;
-        
-        // Split search query into individual terms
-        const searchTerms = this.currentSearchQuery.toLowerCase().split(/\s+/).filter(term => term.length > 2);
+        if (!this.currentSearchQuery || !this._searchTermRegexes) return text;
         let highlightedText = text;
-        
-        searchTerms.forEach(term => {
-            const regex = new RegExp(`\\b(${this.escapeRegex(term)})\\b`, 'gi');
+        this._searchTermRegexes.forEach(regex => {
             highlightedText = highlightedText.replace(regex, '<strong class="search-term">$1</strong>');
         });
-        
         return highlightedText;
+    }
+
+    decodeParentId(value) {
+        if (!value || value === '#') return '#';
+        try {
+            // Try base64 decoding
+            const decoded = atob(value);
+            // Check if it looks like a URL
+            if (decoded.startsWith('http://') || decoded.startsWith('https://')) {
+                return decoded;
+            }
+        } catch (e) {
+            // Not valid base64, fall through
+        }
+        // Return as-is if not base64 or not a URL
+        return value;
     }
 
     getDocumentName(url) {
@@ -293,11 +344,14 @@ class SearchApp {
         const parts = url.split('/');
         const filename = parts[parts.length - 1];
         
+        // Remove any trailing digits that are chunk identifiers (e.g. "file.pdf5")
+        const cleanFilename = filename.replace(/(\.[a-zA-Z]+)\d+$/, '$1');
+        
         // Decode URL encoding if present
         try {
-            return decodeURIComponent(filename) || 'Document';
+            return decodeURIComponent(cleanFilename) || 'Document';
         } catch (e) {
-            return filename || 'Document';
+            return cleanFilename || 'Document';
         }
     }
 
@@ -340,9 +394,8 @@ class SearchApp {
     }
 
     escapeHtml(text) {
-        const div = document.createElement('div');
-        div.textContent = text;
-        return div.innerHTML;
+        if (!text) return '';
+        return text.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
     }
 
     escapeRegex(string) {
@@ -354,6 +407,11 @@ class SearchApp {
         return text.substr(0, maxLength) + '...';
     }
 }
+
+// Initialize the app when the DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new SearchApp();
+});
 
 // Initialize the app when the DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {

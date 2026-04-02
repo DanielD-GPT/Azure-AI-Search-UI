@@ -80,7 +80,14 @@
                 <div id="resultsContainer" class="results-container">
                     <div class="results-header">
                         <h2 id="resultsTitle">Search Results</h2>
-                        <span id="resultsCount" class="results-count"></span>
+                        <div class="results-header-right">
+                            <div id="sortControls" class="sort-controls">
+                                <span class="sort-label">Sort by:</span>
+                                <button id="sortRelevance" class="sort-btn active">Relevance Score</button>
+                                <button id="sortAI" class="sort-btn">AI Score</button>
+                            </div>
+                            <span id="resultsCount" class="results-count"></span>
+                        </div>
                     </div>
                     <div id="resultsList" class="results-list"></div>
                 </div>
@@ -88,6 +95,6 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script src="script.js?v=2"></script>
 </body>
 </html>

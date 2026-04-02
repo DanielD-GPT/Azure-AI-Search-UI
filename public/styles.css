@@ -16,10 +16,11 @@ body {
     max-width: 1800px;
     margin: 0 auto;
     padding: 1rem 2rem;
-    width: 98%;
+    width: 100%;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
+    overflow-x: hidden;
 }
 
 .header {
@@ -145,11 +146,11 @@ body {
 .results-container {
     background: white;
     border-radius: 20px;
-    padding: 2.5rem 3rem;
+    padding: 2rem 2.5rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     border: 1px solid #e2e8f0;
     width: 100%;
-    max-width: 80vw;
+    max-width: 1200px;
     margin: 2rem auto;
     flex-grow: 1;
 }
@@ -161,6 +162,50 @@ body {
     margin-bottom: 1.5rem;
     padding-bottom: 1rem;
     border-bottom: 2px solid #f0f2f5;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.results-header-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sort-label {
+    font-size: 0.85rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.sort-btn {
+    padding: 0.35rem 0.85rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    color: #4a5568;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-family: inherit;
+}
+
+.sort-btn:hover {
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.sort-btn.active {
+    background: #1a365d;
+    color: white;
+    border-color: #1a365d;
 }
 
 .results-header h2 {
@@ -185,11 +230,13 @@ body {
 .result-item {
     background: white;
     border-radius: 12px;
-    padding: 2rem 2.5rem;
+    padding: 1.5rem 2rem;
     border: 1px solid #e1e5e9;
     transition: all 0.3s ease;
     cursor: pointer;
     width: 100%;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .result-item:hover {
@@ -219,6 +266,8 @@ body {
     color: #666;
     margin-bottom: 0.75rem;
     line-height: 1.5;
+    overflow-wrap: break-word;
+    word-break: break-word;
 }
 
 .result-meta {
@@ -492,38 +541,38 @@ body {
 /* Responsive Design */
 @media (max-width: 1600px) {
     .container {
-        width: 98%;
-        padding: 1.5rem;
+        width: 100%;
+        padding: 1rem 1.5rem;
     }
     
     .results-container {
-        max-width: 85vw;
+        max-width: 100%;
     }
     
     .search-container {
-        max-width: 80vw;
+        max-width: 700px;
     }
 }
 
 @media (max-width: 1400px) {
     .container {
-        width: 95%;
-        padding: 1.5rem;
+        width: 100%;
+        padding: 1rem 1.5rem;
     }
     
     .results-container {
-        max-width: 88vw;
+        max-width: 100%;
     }
     
     .search-container {
-        max-width: 85vw;
+        max-width: 700px;
     }
 }
 
 @media (max-width: 1200px) {
     .container {
-        width: 95%;
-        padding: 1.5rem;
+        width: 100%;
+        padding: 1rem;
     }
     
     .main {
@@ -531,11 +580,11 @@ body {
     }
     
     .results-container {
-        max-width: 90vw;
+        max-width: 100%;
     }
     
     .search-container {
-        max-width: 88vw;
+        max-width: 90%;
     }
 }
 
@@ -560,8 +609,8 @@ body {
     
     .search-container,
     .results-container {
-        padding: 1.5rem 2rem;
-        max-width: 90vw;
+        padding: 1.5rem;
+        max-width: 100%;
     }
     
     .results-header-content {
@@ -615,9 +664,9 @@ body {
     
     .search-container,
     .results-container {
-        padding: 1.5rem;
-        margin: 0 0.5rem;
-        max-width: 95vw;
+        padding: 1.25rem;
+        margin: 0;
+        max-width: 100%;
     }
     
     .result-item {
